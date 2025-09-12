@@ -1,28 +1,34 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
-const sequelize = require("./config/db");
+
+const sequelize = require("./config/database"); // import sequelize instance
 
 const app = express();
+
+
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-
-app.use("/api/auth", require("./routes/authRoutes"));
-app.use("/api/books", require("./routes/bookRoutes"));
-app.use("/api/cart", require("./routes/cartRoutes"));
-app.use("/api/orders", require("./routes/orderRoutes"));
-
-
-sequelize.sync().then(() => {
-  console.log("Database connected successfully");
-  app.listen(process.env.PORT || 5000, () =>
-    console.log(`Server running on port ${process.env.PORT}`)
-  );
-}).catch((err) => console.log("DB Connection Error:", err));
 
 app.get("/", (req, res) => {
-  res.send("🚀 Multi-Seller Bookstore Backend is Running Successfully!");
+  res.send("🚀 Backend is running!");
 });
-app.get('/health', (req, res) => res.send('ok'));
+
+
+const PORT = process.env.PORT || 5000;
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("✅ Database connected successfully");
+    return sequelize.sync(); 
+  })
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ DB Connection Error:", err);
+  });
